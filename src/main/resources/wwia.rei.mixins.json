@@ -1,0 +1,11 @@
+{
+	"required": false,
+	"package": "wwia.mixin_rei",
+	"compatibilityLevel": "JAVA_8",
+	"client": [
+		"ReiEntryStackMixin"
+	],
+	"injectors": {
+		"defaultRequire": 0
+	}
+}

@@ -13,7 +13,7 @@
 		"jade": ["wwia.jade.WwiaJadePlugin"],
 		"modmenu": ["wwia.menu.WwiaModMenu"]
 	},
-	"mixins": ["wwia.mixins.json"],
+	"mixins": ["wwia.mixins.json", "wwia.rei.mixins.json"],
 	"depends": {
 		"fabricloader": ">=0.20.0",
 		"minecraft": "~26.3",
@@ -22,6 +22,7 @@
 	"suggests": {
 		"jade": "*",
 		"modmenu": "*",
-		"cloth-config": "*"
+		"cloth-config": "*",
+		"roughlyenoughitems": "*"
 	}
 }

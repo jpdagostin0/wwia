@@ -9,6 +9,7 @@ sets = json.load(open(W + 'sets.json'))
 cur = json.load(open(W + 'gen/reports/registries.json'))
 CUR_B = [k.split(':')[1] for k in cur['minecraft:block']['entries']]
 CUR_E = [k.split(':')[1] for k in cur['minecraft:entity_type']['entries']]
+CUR_I = [k.split(':')[1] for k in cur['minecraft:item']['entries']]
 MOD = REL[REL.index('1.13'):]
 
 def first(kind, i):
@@ -146,6 +147,79 @@ e('1.21.4', 'pale_oak_boat', 'pale_oak_chest_boat')
 
 PRE13_E = set(E)  # entity ids whose value is fully manual
 
+# ---------- items ----------
+# Block items (item id == block id) take the block's date. I holds the non-block items that already existed in the
+# 1.13 registry (pre-flattening history, from the wiki "Additions" sections and item History tables); anything
+# from the 1.13 baseline that is not listed is pre-1.0. Items first registered after 1.13 use the registry diff.
+I = {}
+def it(v, *ids):
+    for i in ids:
+        I[i] = v
+it('1.0', 'blaze_rod', 'ghast_tear', 'gold_nugget', 'potion', 'glass_bottle', 'spider_eye', 'fermented_spider_eye',
+   'blaze_powder', 'magma_cream', 'ender_eye', 'glistering_melon_slice', 'splash_potion',
+   *['music_disc_' + d for d in ['11', 'blocks', 'chirp', 'far', 'mall', 'mellohi', 'stal', 'strad', 'ward']])
+it('1.1', *[m + '_spawn_egg' for m in ['blaze', 'cave_spider', 'chicken', 'cow', 'creeper', 'enderman', 'ghast',
+   'magma_cube', 'mooshroom', 'pig', 'sheep', 'silverfish', 'skeleton', 'slime', 'spider', 'squid', 'villager',
+   'wolf', 'zombie']])
+it('1.2.1', 'ocelot_spawn_egg', 'experience_bottle', 'fire_charge')
+it('1.3.1', 'writable_book', 'written_book', 'emerald', 'enchanted_golden_apple')
+it('1.4.2', 'bat_spawn_egg', 'witch_spawn_egg', 'item_frame', 'carrot', 'potato', 'baked_potato', 'poisonous_potato',
+   'golden_carrot', 'carrot_on_a_stick', 'nether_star', 'pumpkin_pie', 'map')   # map = empty map (12w34a)
+it('1.4.4', 'music_disc_wait')
+it('1.4.6', 'firework_rocket', 'firework_star', 'enchanted_book')
+it('1.5', 'nether_brick', 'quartz', 'tnt_minecart', 'hopper_minecart')
+it('1.6.1', 'horse_spawn_egg', 'iron_horse_armor', 'golden_horse_armor', 'diamond_horse_armor', 'lead', 'name_tag')
+it('1.7.2', 'salmon', 'cooked_salmon', 'pufferfish', 'tropical_fish', 'command_block_minecart')
+it('1.8', 'prismarine_shard', 'prismarine_crystals', 'mutton', 'cooked_mutton', 'rabbit', 'cooked_rabbit',
+   'rabbit_stew', 'rabbit_foot', 'rabbit_hide', 'armor_stand', 'endermite_spawn_egg', 'guardian_spawn_egg',
+   'rabbit_spawn_egg')
+it('1.9', 'spectral_arrow', 'tipped_arrow', 'beetroot', 'beetroot_seeds', 'beetroot_soup', 'chorus_fruit',
+   'popped_chorus_fruit', 'dragon_breath', 'lingering_potion', 'shield', 'elytra', 'end_crystal', 'shulker_spawn_egg',
+   'spruce_boat', 'birch_boat', 'jungle_boat', 'acacia_boat', 'dark_oak_boat')
+it('1.10', 'polar_bear_spawn_egg')
+# 16w20a (1.10) eggs were removed again in 1.10-pre2, so these date from their re-addition in 1.11
+it('1.11', 'totem_of_undying', 'shulker_shell', *[m + '_spawn_egg' for m in ['wither_skeleton', 'donkey', 'mule',
+   'skeleton_horse', 'zombie_horse', 'elder_guardian', 'husk', 'stray', 'zombie_villager', 'vindicator', 'llama',
+   'evoker', 'vex']])
+it('1.11.1', 'iron_nugget')
+it('1.12', 'knowledge_book', 'parrot_spawn_egg')
+it('1.13', 'turtle_helmet', 'trident', 'phantom_membrane', 'nautilus_shell', 'heart_of_the_sea', 'cod_bucket',
+   'salmon_bucket', 'pufferfish_bucket', 'tropical_fish_bucket', 'dried_kelp', 'debug_stick',
+   *[m + '_spawn_egg' for m in ['cod', 'salmon', 'pufferfish', 'tropical_fish', 'dolphin', 'drowned', 'phantom',
+   'turtle']])
+
+RENAMED_I = {
+    'red_dye': 'pre-1.0', 'yellow_dye': 'pre-1.0', 'green_dye': 'pre-1.0',  # rose_red/dandelion_yellow/cactus_green (1.14)
+    'zombified_piglin_spawn_egg': '1.1',                                   # zombie_pigman_spawn_egg (1.16)
+    'turtle_scute': '1.13',                                                # scute (1.20.5)
+    # 26.3 split explorer maps off filled_map; they keep the date the map variant first existed
+    'ocean_monument_map': '1.11', 'woodland_mansion_map': '1.11',          # ocean/woodland explorer maps
+    'buried_treasure_map': '1.13',
+    'buried_trial_chambers_map': '1.21',                                   # trial explorer map (exp. 1.20.5)
+    'jungle_pyramid_map': '1.21.5', 'swamp_hut_map': '1.21.5',             # trade-rebalance maps, default in 25w07a
+    **{v + '_village_map': '1.21.5' for v in ['desert', 'plains', 'savanna', 'snowy', 'taiga']},
+}
+EXP_DEFAULT_OK['item'] = {
+    'ender_dragon_spawn_egg', 'iron_golem_spawn_egg', 'snow_golem_spawn_egg', 'wither_spawn_egg',  # 1.19.3, default
+    'armadillo_scute', 'armadillo_spawn_egg', 'wolf_armor',                                        # 1.20.5, default
+    'bordure_indented_banner_pattern', 'field_masoned_banner_pattern',                             # 1.21.2, default
+    *[c + '_bundle' for c in COLORS],                                                              # 1.21.2, default
+}
+
+def item_value(i, blocks):
+    if i in RENAMED_I:
+        return RENAMED_I[i], 'rename/special'
+    if 'minecraft:' + i in blocks:
+        return blocks['minecraft:' + i], 'block item'
+    f = first('item', i)
+    if f is None:
+        raise SystemExit('no first for item ' + i)
+    if f == '1.13':
+        return I.get(i, 'pre-1.0'), 'pre-1.13 table' + ('' if i in I else ' (default pre-1.0)')
+    if f in EXP and i not in EXP_DEFAULT_OK['item']:
+        return EXP[f], 'experimental in %s' % f
+    return f, 'registry diff'
+
 def block_value(i):
     if i in RENAMED_B:
         return RENAMED_B[i], 'rename/special'
@@ -175,20 +249,30 @@ for i in CUR_B:
     v, w = block_value(i); blocks['minecraft:' + i] = v; why['b:' + i] = w
 for i in CUR_E:
     v, w = entity_value(i); ents['minecraft:' + i] = v; why['e:' + i] = w
+items = {}
+for i in CUR_I:
+    v, w = item_value(i, blocks); items['minecraft:' + i] = v; why['i:' + i] = w
 
 # sanity
 valid = set(VERSIONS) | {'pre-1.0'}
 assert all(v in valid for v in blocks.values()), [k for k, v in blocks.items() if v not in valid]
 assert all(v in valid for v in ents.values())
+assert all(v in valid for v in items.values()), [k for k, v in items.items() if v not in valid]
+assert len(items) == len(CUR_I) == len(set(CUR_I))
 unused = set(B) - set(sets['block']['1.13'])
 print('B keys not in 1.13:', unused)
 print('E keys not in 26.3:', set(E) - set(CUR_E))
-out = {'versions': VERSIONS, 'blocks': blocks, 'entities': ents}
+print('I keys not in 1.13 items:', set(I) - set(sets['item']['1.13']))
+print('I keys that are blocks:', {i for i in I if 'minecraft:' + i in blocks})
+print('RENAMED_I keys not in 26.3:', set(RENAMED_I) - set(CUR_I))
+print('EXP_DEFAULT_OK items not in an EXP version:',
+      {i for i in EXP_DEFAULT_OK['item'] if first('item', i) not in EXP})
+out = {'versions': VERSIONS, 'blocks': blocks, 'entities': ents, 'items': items}
 json.dump(out, open('/home/jp/projs/wwia/data/added.json', 'w'), indent=2)
 json.dump(why, open(W + 'why.json', 'w'), indent=1)
 from collections import Counter
 order = {v: n for n, v in enumerate(['pre-1.0'] + VERSIONS)}
-cb, ce = Counter(blocks.values()), Counter(ents.values())
-print(len(blocks), 'blocks', len(ents), 'entities')
-for v in sorted(set(cb) | set(ce), key=order.get):
-    print('%-8s blocks=%4d entities=%3d' % (v, cb[v], ce[v]))
+cb, ce, ci = Counter(blocks.values()), Counter(ents.values()), Counter(items.values())
+print(len(blocks), 'blocks', len(ents), 'entities', len(items), 'items')
+for v in sorted(set(cb) | set(ce) | set(ci), key=lambda v: order[v]):
+    print('%-8s blocks=%4d entities=%3d items=%4d' % (v, cb[v], ce[v], ci[v]))

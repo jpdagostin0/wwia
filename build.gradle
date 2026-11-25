@@ -24,6 +24,10 @@ dependencies {
 		implementation "maven.modrinth:jade:${project.jade_version}"
 	}
 	implementation "maven.modrinth:modmenu:${project.modmenu_version}"
+	if (!project.hasProperty('noRei')) { // ./gradlew runClient -PnoRei runs without REI
+		implementation "maven.modrinth:rei:${project.rei_version}"
+		implementation "maven.modrinth:architectury-api:${project.architectury_version}"
+	}
 	implementation "maven.modrinth:cloth-config:${project.cloth_config_version}"
 }
 

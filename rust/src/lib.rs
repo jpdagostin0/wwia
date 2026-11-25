@@ -1,7 +1,7 @@
 //! When Was It Added (wwia): a Fabric mod written in Rust and compiled to JVM
 //! bytecode by rustc_codegen_jvm. Looking at a block or mob shows the
 //! Minecraft release that added it, in Jade's tooltip when Jade is installed
-//! and in a small HUD line otherwise.
+//! and in a small HUD line otherwise. Item tooltips in REI get the version too.
 #![feature(extern_types, register_tool)]
 #![register_tool(jvm_codegen)]
 // JVM bindings pass references and &dyn interfaces through `extern` imports.
@@ -16,6 +16,8 @@ pub mod jvm_std;
 pub mod mc;
 pub mod menu;
 pub mod mixin;
+pub mod mixin_rei;
+pub mod rei;
 
 use mc::ClientModInitializer;
 
@@ -26,9 +28,10 @@ impl ClientModInitializer for WwiaClient {
     fn on_initialize_client(&mut self) {
         config::load();
         mc::log(&format!(
-            "[wwia] loaded {} block and {} entity dates; cutoff {}",
+            "[wwia] loaded {} block, {} entity and {} item dates; cutoff {}",
             data::BLOCK_COUNT,
             data::ENTITY_COUNT,
+            data::ITEM_COUNT,
             config::cutoff_name()
         ));
     }

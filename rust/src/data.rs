@@ -115,6 +115,9 @@ pub const PRE_RELEASE: u16 = 65535;
 pub static BLOCKS: &str = include_str!("data_blocks.txt");
 /// `<entity type path> <version index>` lines, for `minecraft:` entities.
 pub static ENTITIES: &str = include_str!("data_entities.txt");
+/// `<item path> <version index>` lines, for `minecraft:` items.
+pub static ITEMS: &str = include_str!("data_items.txt");
 
 pub const BLOCK_COUNT: usize = 1286;
 pub const ENTITY_COUNT: usize = 161;
+pub const ITEM_COUNT: usize = 1658;

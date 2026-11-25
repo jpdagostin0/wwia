@@ -15,6 +15,7 @@ pub enum Added {
 struct Tables {
     blocks: HashMap<&'static str, u16>,
     entities: HashMap<&'static str, u16>,
+    items: HashMap<&'static str, u16>,
 }
 
 fn parse(table: &'static str) -> HashMap<&'static str, u16> {
@@ -32,6 +33,7 @@ fn tables() -> &'static Tables {
     TABLES.get_or_init(|| Tables {
         blocks: parse(data::BLOCKS),
         entities: parse(data::ENTITIES),
+        items: parse(data::ITEMS),
     })
 }
 
@@ -53,6 +55,21 @@ pub fn block(id: &str) -> Option<Added> {
 pub fn entity(id: &str) -> Option<Added> {
     let path = id.strip_prefix("minecraft:")?;
     tables().entities.get(path).copied().map(decode)
+}
+
+/// Looks up an item (`minecraft:diamond_sword`). Falls back to the block of
+/// the same id, then to the mob for a spawn egg, for ids the item table lacks.
+pub fn item(id: &str) -> Option<Added> {
+    let path = id.strip_prefix("minecraft:")?;
+    let tables = tables();
+    if let Some(code) = tables.items.get(path) {
+        return Some(decode(*code));
+    }
+    if let Some(code) = tables.blocks.get(path) {
+        return Some(decode(*code));
+    }
+    let mob = path.strip_suffix("_spawn_egg")?;
+    tables.entities.get(mob).copied().map(decode)
 }
 
 /// Warms the lookup tables (called at startup, off the render path).
