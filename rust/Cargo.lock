@@ -35,6 +35,7 @@ dependencies = [
 [[package]]
 name = "rcj"
 version = "0.1.1"
+source = "git+https://github.com/jpdagostin0/rustc_codegen_jvm?branch=mixin-support#c05f90c17bd1c8c88d9be23abad3a53f398edc85"
 dependencies = [
  "proc-macro2",
  "quote",

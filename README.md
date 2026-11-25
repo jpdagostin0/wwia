@@ -43,15 +43,20 @@ impl HudMixin {
 ```
 
 Upstream rustc_codegen_jvm doesn't support this yet. It needs the
-`mixin-support` branch of `~/src/rustc_codegen_jvm` (commit `c05f90c`), which
-adds two things:
+[`mixin-support` branch](https://github.com/jpdagostin0/rustc_codegen_jvm/tree/mixin-support)
+of my fork, which adds two things:
 
 - `#[jvm::annotation]` works on impl methods.
 - `@Mixin` structs are emitted as clean template classes, with no `RustCopy`,
   `eq` or public static bridges, because Mixin rejects or would merge those.
 
-`rust/Cargo.toml` points at that checkout's `jvm` crate, and cargo-jvm's
-`backend_path` must point at the same checkout.
+`rust/Cargo.toml` pulls the `jvm` macro crate from that branch, and cargo-jvm's
+backend has to be built from it too:
+
+```sh
+git clone -b mixin-support https://github.com/jpdagostin0/rustc_codegen_jvm
+cd rustc_codegen_jvm && cargo install --path cargo-jvm && cargo jvm setup "$PWD"
+```
 
 ## Data
 
@@ -65,7 +70,7 @@ calls. `tools/gen_data.py` regenerates `rust/src/data*.{rs,txt}` from it.
 Requires JDK 25, rustup, and cargo-jvm with the patched backend.
 
 ```sh
-JAVA_HOME=~/.local/jdks/jdk-25.0.5.1+2 ./gradlew build   # -> build/libs/wwia-1.0.0.jar
+./gradlew build                     # with JAVA_HOME pointing at a JDK 25   # -> build/libs/wwia-1.0.0.jar
 ./gradlew runClient                 # dev client with Jade, Mod Menu and Cloth Config
 ./gradlew runClient -PnoJade        # tests the HUD fallback
 ```
