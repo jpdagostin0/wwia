@@ -1,0 +1,78 @@
+plugins {
+	id 'net.fabricmc.fabric-loom' version "${loom_version}"
+}
+
+// The mod has no Java sources: every class (entrypoints, Jade plugin, config
+// screen glue and the Mixin classes) is compiled from Rust in ./rust by
+// rustc_codegen_jvm (https://github.com/IntegralPilot/rustc_codegen_jvm).
+
+repositories {
+	maven {
+		name = 'Modrinth'
+		url = 'https://api.modrinth.com/maven'
+		content { includeGroup 'maven.modrinth' }
+	}
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+
+	// Optional integrations, present in the dev runtime for testing.
+	if (!project.hasProperty('noJade')) { // ./gradlew runClient -PnoJade tests the HUD fallback
+		implementation "maven.modrinth:jade:${project.jade_version}"
+	}
+	implementation "maven.modrinth:modmenu:${project.modmenu_version}"
+	implementation "maven.modrinth:cloth-config:${project.cloth_config_version}"
+}
+
+def rustDir = file('rust')
+def rustJar = layout.buildDirectory.file('rust/wwia-rust.jar')
+def rustClasses = layout.buildDirectory.dir('rust/classes')
+
+def cargoJvm = providers.environmentVariable('CARGO_JVM')
+		.orElse("${System.getProperty('user.home')}/.cargo/bin/cargo-jvm")
+
+tasks.register('cargoJvmPackage', Exec) {
+	group = 'build'
+	description = 'Compiles the Rust mod to JVM bytecode with rustc_codegen_jvm.'
+	workingDir rustDir
+	inputs.dir(file('rust/src'))
+	inputs.file(file('rust/Cargo.toml'))
+	outputs.file(rustJar)
+	commandLine cargoJvm.get(), 'jvm', 'package', '--lib', '--release',
+			'--output', rustJar.get().asFile.absolutePath
+}
+
+tasks.register('rustClasses', Sync) {
+	dependsOn 'cargoJvmPackage'
+	from(zipTree(rustJar)) {
+		exclude 'META-INF/**'
+	}
+	into rustClasses
+	// cargo-jvm's jar stores directory entries without permission bits.
+	dirPermissions { unix('rwxr-xr-x') }
+	filePermissions { unix('rw-r--r--') }
+}
+
+sourceSets.main.output.dir(rustClasses, builtBy: 'rustClasses')
+
+processResources {
+	def version = project.version
+	inputs.property 'version', version
+	filesMatching('fabric.mod.json') {
+		expand 'version': version
+	}
+}
+
+java {
+	sourceCompatibility = JavaVersion.VERSION_25
+	targetCompatibility = JavaVersion.VERSION_25
+}
+
+jar {
+	from('LICENSE') {
+		rename { "${it}_wwia" }
+	}
+}

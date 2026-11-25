@@ -1,0 +1,10 @@
+{
+	"wwia.config.title": "When Was It Added",
+	"wwia.config.general": "General",
+	"wwia.config.cutoff": "Version cutoff",
+	"wwia.config.cutoff.tooltip": "Things added before this release just say \"Minecraft\".",
+	"wwia.config.cutoff.tooltip2": "Anything from before 1.0 always just says \"Minecraft\".",
+	"wwia.config.show_hud": "Show on HUD without Jade",
+	"wwia.config.show_hud.tooltip": "Draw the version at the top of the screen when Jade isn't installed.",
+	"config.jade.plugin_wwia.added_in": "When Was It Added"
+}

@@ -1,0 +1,19 @@
+[package]
+name = "wwia"
+version = "1.0.0"
+edition = "2024"
+description = "When Was It Added: shows the Minecraft version that added the block or mob you're looking at"
+license = "CC0-1.0"
+publish = false
+
+[lib]
+crate-type = ["lib"]
+
+[dependencies]
+# Attribute macros for JVM bindings, from rustc_codegen_jvm. Needs the
+# `mixin-support` branch (method annotations + Mixin-safe classes); this must be
+# the same checkout cargo-jvm's backend_path points to.
+jvm = { package = "rcj", path = "../../../src/rustc_codegen_jvm/jvm" }
+
+[profile.release]
+debug = false

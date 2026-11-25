@@ -1,0 +1,27 @@
+{
+	"schemaVersion": 1,
+	"id": "wwia",
+	"version": "${version}",
+	"name": "When Was It Added",
+	"description": "Shows which Minecraft version added the block or mob you're looking at. Written in Rust, compiled to JVM bytecode with rustc_codegen_jvm.",
+	"authors": ["jpdagostin0"],
+	"license": "CC0-1.0",
+	"icon": "assets/wwia/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"client": ["wwia.WwiaClient"],
+		"jade": ["wwia.jade.WwiaJadePlugin"],
+		"modmenu": ["wwia.menu.WwiaModMenu"]
+	},
+	"mixins": ["wwia.mixins.json"],
+	"depends": {
+		"fabricloader": ">=0.20.0",
+		"minecraft": "~26.3",
+		"java": ">=25"
+	},
+	"suggests": {
+		"jade": "*",
+		"modmenu": "*",
+		"cloth-config": "*"
+	}
+}
